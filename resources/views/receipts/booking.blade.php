@@ -120,7 +120,10 @@
                 <p><strong>ملاحظات:</strong> {{ $booking->notes }}</p>
                 <p><strong>المستلم:</strong> {{ auth()->user()?->name }}</p>
             </div>
-            <div class="receipt-qr">{!! $qr !!}</div>
+            <div class="receipt-qr">
+                {!! $qr !!}
+                <small>استعلام حالة التأشيرات</small>
+            </div>
         </section>
     </div>
 @endsection

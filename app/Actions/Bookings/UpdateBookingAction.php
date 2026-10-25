@@ -2,10 +2,10 @@
 
 namespace App\Actions\Bookings;
 
+use App\Enums\VisaStatus;
 use App\Models\Booking;
 use App\Models\User;
 use App\Models\Visa;
-use App\Enums\VisaStatus;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;

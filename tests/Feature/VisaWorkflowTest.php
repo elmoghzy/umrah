@@ -27,6 +27,7 @@ use App\Models\Visa;
 use Filament\Notifications\Notification;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -45,7 +46,28 @@ class VisaWorkflowTest extends TestCase
         $this->assertSame(3, $booking->visas()->count());
         $this->assertSame(3, $booking->visas()->where('status', VisaStatus::Pending->value)->count());
         $this->assertSame(48, strlen($booking->public_token));
-        $this->assertNull($booking->publicUrl());
+        $this->assertNotNull($booking->publicUrl());
+        $this->assertStringContainsString('/visa-status/'.$booking->public_token, $booking->publicUrl());
+    }
+
+    public function test_public_visa_status_page_shows_each_resident_latest_visa_status(): void
+    {
+        $this->actingAs($this->manager());
+        $booking = $this->makeBooking(dependentCount: 1);
+        $residents = $booking->residents()->with('customer')->get();
+        $residents[0]->customer->update(['name_ar' => 'ولي الأمر']);
+        $residents[1]->customer->update(['name_ar' => 'المرافق']);
+
+        app(UpdateVisaStatusAction::class)->handle($booking->visas()->where('customer_id', $residents[1]->customer_id)->firstOrFail(), VisaStatus::Rejected, rejectedReason: 'بيانات غير مكتملة');
+
+        $response = $this->get(route('visas.public', ['token' => $booking->public_token]));
+
+        $response->assertOk()
+            ->assertSee('ولي الأمر')
+            ->assertSee('المرافق')
+            ->assertSee(VisaStatus::Pending->getLabel())
+            ->assertSee(VisaStatus::Rejected->getLabel())
+            ->assertSee('بيانات غير مكتملة');
     }
 
     public function test_issued_transition_requires_a_pdf_and_records_the_user_and_event(): void
@@ -251,6 +273,49 @@ class VisaWorkflowTest extends TestCase
         Livewire::test(PendingVisas::class)
             ->assertSee('تأشيرات قيد الاستخراج')
             ->assertSee('1');
+    }
+
+    public function test_visa_worklist_groups_bookings_and_keeps_full_counts_when_pending_filter_is_active(): void
+    {
+        Storage::fake('visas');
+        $manager = $this->manager();
+        $this->actingAs($manager);
+
+        $bookingWithFour = $this->makeBooking(dependentCount: 3);
+        $bookingWithTwo = $this->makeBooking(dependentCount: 1);
+        $bookingWithOne = $this->makeBooking();
+
+        $bookings = collect([
+            [$bookingWithFour, 41001, 'ولي الأمر أربعة'],
+            [$bookingWithTwo, 41002, 'ولي الأمر اثنان'],
+            [$bookingWithOne, 41003, 'ولي الأمر واحد'],
+        ]);
+
+        foreach ($bookings as [$booking, $number, $guardianName]) {
+            $booking->update(['booking_number' => $number]);
+            $booking->customer->update(['name_ar' => $guardianName]);
+        }
+
+        $issuedVisa = $bookingWithFour->visas()->firstOrFail();
+        $filePath = $this->storePdf($issuedVisa, "%PDF-1.7\ngrouped visa\n");
+        app(UpdateVisaStatusAction::class)->handle($issuedVisa, VisaStatus::Issued, $filePath);
+
+        $queryCount = 0;
+        DB::listen(static function () use (&$queryCount): void {
+            $queryCount++;
+        });
+
+        $component = Livewire::test(ListVisas::class);
+
+        $component
+            ->assertSee('حجز 41001 — ولي الأمر: ولي الأمر أربعة')
+            ->assertSee('حجز 41002 — ولي الأمر: ولي الأمر اثنان')
+            ->assertSee('حجز 41003 — ولي الأمر: ولي الأمر واحد')
+            ->assertSee('1 من 4 مستخرجة')
+            ->assertSee('ولي الأمر')
+            ->assertSee('مرافق');
+
+        $this->assertLessThan(20, $queryCount);
     }
 
     public function test_booking_table_shows_visa_progress_and_relation_manager_is_registered(): void

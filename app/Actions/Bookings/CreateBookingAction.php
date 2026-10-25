@@ -3,6 +3,7 @@
 namespace App\Actions\Bookings;
 
 use App\Enums\StayScope;
+use App\Enums\VisaStatus;
 use App\Models\Booking;
 use App\Models\City;
 use App\Models\Customer;
@@ -10,7 +11,6 @@ use App\Models\Hotel;
 use App\Models\RoomType;
 use App\Models\Transport;
 use App\Models\Visa;
-use App\Enums\VisaStatus;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;

@@ -1,7 +1,8 @@
 <?php
 
-use App\Models\Booking;
+use App\Http\Controllers\PublicVisaStatusController;
 use App\Http\Controllers\VisaFileController;
+use App\Models\Booking;
 use App\Reports\BookingListQuery;
 use App\Reports\HotelRoomsQuery;
 use App\Reports\TripMovementsQuery;
@@ -19,10 +20,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect('/admin/login'))->name('login');
 
+Route::get('/visa-status/{token}', PublicVisaStatusController::class)->name('visas.public');
+
 Route::middleware('auth')->get('/admin/bookings/{booking}/receipt', function (Booking $booking) {
     Gate::authorize('view', $booking);
     $renderer = new ImageRenderer(new RendererStyle(180), new SvgImageBackEnd);
-    $qr = (new Writer($renderer))->writeString(config('umrah.receipt_qr_url'));
+    $qr = (new Writer($renderer))->writeString($booking->publicUrl());
 
     return view('receipts.booking', [
         'booking' => $booking->load([

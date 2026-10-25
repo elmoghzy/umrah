@@ -15,6 +15,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class VisaRecordActions
@@ -37,15 +38,14 @@ class VisaRecordActions
                     ->live(),
                 self::fileUpload()
                     ->label('ملف التأشيرة PDF')
-                    ->visible(fn (Get $get): bool => $get('status') === VisaStatus::Issued->value)
-                    ->required(fn (Get $get, Visa $record): bool => $get('status') === VisaStatus::Issued->value && blank($record->file_path))
-                    ->helperText('يلزم ملف PDF صالح عند اعتماد التأشيرة لأول مرة.'),
+                    ->required(fn (Get $get, Visa $record): bool => self::statusValue($get('status')) === VisaStatus::Issued->value && blank($record->file_path))
+                    ->helperText('أرفق ملف PDF، ويصبح إلزامياً عند اختيار حالة تم استخراج التأشيرة.'),
                 Textarea::make('rejected_reason')
                     ->label('سبب الرفض')
                     ->minLength(3)
                     ->maxLength(255)
-                    ->visible(fn (Get $get): bool => $get('status') === VisaStatus::Rejected->value)
-                    ->required(fn (Get $get): bool => $get('status') === VisaStatus::Rejected->value),
+                    ->visible(fn (Get $get): bool => self::statusValue($get('status')) === VisaStatus::Rejected->value)
+                    ->required(fn (Get $get): bool => self::statusValue($get('status')) === VisaStatus::Rejected->value),
                 TextInput::make('visa_number')
                     ->label('رقم التأشيرة')
                     ->maxLength(100),
@@ -55,7 +55,7 @@ class VisaRecordActions
 
                 app(UpdateVisaStatusAction::class)->handle(
                     $visa,
-                    VisaStatus::from((string) $data['status']),
+                    self::statusFromState($data['status']),
                     self::singleFilePath($data['file_path'] ?? null),
                     $data['rejected_reason'] ?? null,
                     $data['visa_number'] ?? null,
@@ -162,6 +162,24 @@ class VisaRecordActions
         }
 
         return is_string($state) && filled($state) ? $state : null;
+    }
+
+    private static function statusFromState(mixed $state): VisaStatus
+    {
+        if ($state instanceof VisaStatus) {
+            return $state;
+        }
+
+        if (is_string($state)) {
+            return VisaStatus::from($state);
+        }
+
+        throw new InvalidArgumentException('حالة التأشيرة غير صالحة.');
+    }
+
+    private static function statusValue(mixed $state): ?string
+    {
+        return $state instanceof VisaStatus ? $state->value : (is_string($state) ? $state : null);
     }
 
     private static function singleOriginalName(mixed $state): ?string

@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\Bookings\RelationManagers;
 
+use App\Enums\VisaStatus;
 use App\Filament\Resources\Visas\Tables\VisaRecordActions;
 use App\Models\Booking;
+use App\Models\Visa;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -30,10 +32,24 @@ class VisasRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('customer.name_ar')
+            ->description(function (): string {
+                $booking = $this->getOwnerRecord();
+                $booking->loadCount([
+                    'visas',
+                    'visas as issued_visas_count' => fn (Builder $query): Builder => $query->where('status', VisaStatus::Issued->value),
+                ]);
+
+                return $booking->issued_visas_count.' من '.$booking->visas_count.' مستخرجة';
+            })
             ->columns([
                 TextColumn::make('customer.name_ar')
                     ->label('المعتمر')
                     ->searchable(),
+                TextColumn::make('relation')
+                    ->label('الصفة')
+                    ->state(fn (Visa $record): string => $record->customer_id === $record->booking?->customer_id ? 'ولي الأمر' : 'مرافق')
+                    ->badge()
+                    ->color(fn (Visa $record): string => $record->customer_id === $record->booking?->customer_id ? 'primary' : 'gray'),
                 TextColumn::make('status')
                     ->label('الحالة')
                     ->badge(),
@@ -54,8 +70,16 @@ class VisasRelationManager extends RelationManager
                 VisaRecordActions::file(),
                 VisaRecordActions::history(),
             ])
-            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['customer', 'latestEvent.user']))
-            ->defaultSort('id', 'asc');
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query
+                ->with(['customer', 'booking', 'latestEvent.user'])
+                ->orderBy(
+                    Visa::query()
+                        ->select('id')
+                        ->whereColumn('id', 'visas.id')
+                        ->where('customer_id', $this->getOwnerRecord()->customer_id),
+                    'desc',
+                )
+                ->orderBy('id', 'asc'));
     }
 
     public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool

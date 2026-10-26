@@ -52,8 +52,6 @@ class BookingsTable
                         locale: config('umrah.currency_locale'),
                         decimalPlaces: (int) config('umrah.currency_decimal_places'),
                     )),
-                TextColumn::make('details.check_in')->label('أول دخول')->date()->sortable(),
-                TextColumn::make('created_at')->label('تاريخ الإنشاء')->dateTime()->sortable(),
             ])
             ->filters([
                 TrashedFilter::make(),

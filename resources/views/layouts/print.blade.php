@@ -46,8 +46,9 @@
         .receipt-page table.travelers td, .receipt-page table.travelers th { padding: 3px 5px; font-size: 11px; word-break: break-word; }
         .receipt-page .receipt-footer { display: grid; grid-template-columns: 1fr 32mm; gap: 5mm; align-items: center; }
         .receipt-page .receipt-footer p { margin: 5px 0; }
-        .receipt-page .receipt-qr { text-align: center; line-height: 0; }
+        .receipt-page .receipt-qr { text-align: center; line-height: 1.25; }
         .receipt-page .receipt-qr svg, .receipt-page .receipt-qr img { display: block; width: 32mm !important; height: 32mm !important; max-width: 32mm; margin: auto; }
+        .receipt-page .receipt-qr small { display: block; margin-top: 2mm; }
         @media print {
             .no-print { display: none !important; }
             .receipt-page .print-section { display: flex; flex-direction: column; gap: 2mm; }
@@ -73,5 +74,12 @@
 
     @yield('content')
     </main>
+    @if ($autoPrint ?? false)
+        <script>
+            window.addEventListener('load', () => {
+                window.setTimeout(() => window.print(), 300);
+            });
+        </script>
+    @endif
 </body>
 </html>

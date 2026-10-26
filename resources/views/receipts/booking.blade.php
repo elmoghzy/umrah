@@ -17,6 +17,7 @@
 @extends('layouts.print')
 
 @php($watermark = true)
+@php($autoPrint = true)
 
 @section('page-class', 'receipt-page')
 

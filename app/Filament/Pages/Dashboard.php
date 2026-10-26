@@ -3,7 +3,6 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Widgets\DashboardQuickActions;
-use App\Filament\Widgets\DashboardStats;
 use App\Filament\Widgets\PendingVisas;
 use BackedEnum;
 use Filament\Pages\Dashboard as BaseDashboard;
@@ -32,7 +31,6 @@ class Dashboard extends BaseDashboard
     {
         return [
             DashboardQuickActions::class,
-            DashboardStats::class,
             PendingVisas::class,
         ];
     }

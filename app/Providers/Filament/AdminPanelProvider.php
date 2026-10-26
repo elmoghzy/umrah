@@ -7,7 +7,6 @@ use App\Filament\Pages\Dashboard;
 use App\Filament\Widgets\BookingTrendChart;
 use App\Filament\Widgets\BookingTypeChart;
 use App\Filament\Widgets\DashboardQuickActions;
-use App\Filament\Widgets\DashboardStats;
 use App\Filament\Widgets\RecentBookingsTable;
 use Filament\FontProviders\LocalFontProvider;
 use Filament\Http\Middleware\Authenticate;
@@ -87,7 +86,6 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 DashboardQuickActions::class,
-                DashboardStats::class,
                 BookingTrendChart::class,
                 BookingTypeChart::class,
                 RecentBookingsTable::class,

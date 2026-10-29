@@ -70,13 +70,16 @@ class BookingsTable
                         DatePicker::make('until')->label('إلى'),
                     ])
                     ->query(fn (Builder $query, array $data): Builder => $query
-                        ->when($data['from'] ?? null, fn (Builder $query, $date): Builder => $query->whereHas('details', fn (Builder $details): Builder => $details->whereDate('check_in', '>=', $date)))
-                        ->when($data['until'] ?? null, fn (Builder $query, $date): Builder => $query->whereHas('details', fn (Builder $details): Builder => $details->whereDate('check_in', '<=', $date)))),
+                        ->when($data['from'] ?? null, fn (Builder $query, $date): Builder => $query->whereHas('details', fn (Builder $details): Builder => $details->where('check_in', '>=', $date)))
+                        ->when($data['until'] ?? null, fn (Builder $query, $date): Builder => $query->whereHas('details', fn (Builder $details): Builder => $details->where('check_in', '<=', $date)))),
             ])
-            ->modifyQueryUsing(fn (Builder $query): Builder => $query->withCount([
-                'visas as visas_total_count',
-                'visas as visas_issued_count' => fn (Builder $visas): Builder => $visas->where('status', VisaStatus::Issued->value),
-            ]))
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query
+                ->with(['broker', 'customer', 'bookingType'])
+                ->withCount([
+                    'visas as visas_total_count',
+                    'visas as visas_issued_count' => fn (Builder $visas): Builder => $visas->where('status', VisaStatus::Issued->value),
+                ]))
+            ->summaries(allTableCondition: false)
             ->recordActions([
                 ViewAction::make()->label('عرض'),
                 ...SimpleResourceTableActions::recordActions(),

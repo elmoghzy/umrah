@@ -29,7 +29,10 @@ class DashboardStats extends StatsOverviewWidget
 
         if (BookingResource::canViewAny()) {
             $totalBookings = Booking::query()->forUser(auth()->user())->count();
-            $todaysBookings = Booking::query()->forUser(auth()->user())->whereDate('created_at', today())->count();
+            $todaysBookings = Booking::query()
+                ->forUser(auth()->user())
+                ->whereBetween('created_at', [today()->startOfDay(), today()->endOfDay()])
+                ->count();
             $monthNet = (float) Booking::query()
                 ->forUser(auth()->user())
                 ->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
@@ -90,8 +93,8 @@ class DashboardStats extends StatsOverviewWidget
                     ->whereHas('bookingDetail', function ($query): void {
                         $query
                             ->whereHas('booking', fn ($booking) => $booking->forUser(auth()->user()))
-                            ->whereDate('check_in', '<=', today())
-                            ->whereDate('check_out', '>=', today());
+                            ->where('check_in', '<=', today())
+                            ->where('check_out', '>=', today());
                     })
                     ->count();
 

@@ -17,7 +17,7 @@ class UpcomingTripsTable extends BaseWidget
     public function table(Table $table): Table
     {
         return $table
-            ->query(BookingDetail::query()->whereHas('booking', fn (Builder $booking): Builder => $booking->forUser(auth()->user()))->with(['booking.customer', 'hotel'])->whereDate('check_in', '>=', today())->whereDate('check_in', '<=', today()->addDays(30))->orderBy('check_in'))
+            ->query(BookingDetail::query()->whereHas('booking', fn (Builder $booking): Builder => $booking->forUser(auth()->user()))->with(['booking.customer', 'hotel'])->whereBetween('check_in', [today(), today()->addDays(30)])->orderBy('check_in'))
             ->columns([
                 TextColumn::make('booking.booking_number')->label('رقم الحجز'),
                 TextColumn::make('booking.customer.name_ar')->label('ولي الأمر'),

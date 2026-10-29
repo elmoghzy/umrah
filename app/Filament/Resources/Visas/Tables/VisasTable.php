@@ -83,8 +83,8 @@ class VisasTable
                         DatePicker::make('until')->label('إلى'),
                     ])
                     ->query(fn (Builder $query, array $data): Builder => $query
-                        ->when($data['from'] ?? null, fn (Builder $query, $from): Builder => $query->whereHas('booking.details', fn (Builder $details): Builder => $details->whereDate('check_in', '>=', $from)))
-                        ->when($data['until'] ?? null, fn (Builder $query, $until): Builder => $query->whereHas('booking.details', fn (Builder $details): Builder => $details->whereDate('check_in', '<=', $until)))),
+                        ->when($data['from'] ?? null, fn (Builder $query, $from): Builder => $query->whereHas('booking.details', fn (Builder $details): Builder => $details->where('check_in', '>=', $from)))
+                        ->when($data['until'] ?? null, fn (Builder $query, $until): Builder => $query->whereHas('booking.details', fn (Builder $details): Builder => $details->where('check_in', '<=', $until)))),
             ])
             ->recordActions([
                 VisaRecordActions::updateStatus(),

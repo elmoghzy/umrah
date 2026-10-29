@@ -27,7 +27,7 @@ class TripMovementsQuery
             ->when($filters['booking_type_id'] ?? null, fn (Builder $query, $value) => $query->whereHas('booking', fn (Builder $booking) => $booking->where('booking_type_id', $value)))
             ->when($filters['broker_id'] ?? null, fn (Builder $query, $value) => $query->whereHas('booking', fn (Builder $booking) => $booking->where('broker_id', $value)))
             ->when($filters['airplane_id'] ?? null, fn (Builder $query, $value) => $query->whereHas('booking', fn (Builder $booking) => $booking->where('airplane_id', $value)))
-            ->when($filters['date_range']['from'] ?? null, fn (Builder $query, $value) => $query->whereDate('check_in', '>=', $value))
-            ->when($filters['date_range']['to'] ?? null, fn (Builder $query, $value) => $query->whereDate('check_in', '<=', $value));
+            ->when($filters['date_range']['from'] ?? null, fn (Builder $query, $value) => $query->where('check_in', '>=', $value))
+            ->when($filters['date_range']['to'] ?? null, fn (Builder $query, $value) => $query->where('check_in', '<=', $value));
     }
 }

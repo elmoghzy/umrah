@@ -176,13 +176,6 @@ class VisasTable
                             ->limit(1),
                         $direction,
                     )
-                    ->orderBy(
-                        Visa::query()
-                            ->select('id')
-                            ->whereColumn('id', 'visas.id')
-                            ->whereColumn('customer_id', 'visa_bookings.customer_id'),
-                        'desc',
-                    )
                     ->orderBy('visas.id');
 
                 return $query;

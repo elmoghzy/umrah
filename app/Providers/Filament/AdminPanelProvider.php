@@ -18,6 +18,8 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Support\Icons\Heroicon;
+use Filament\View\PanelsRenderHook;
+use Illuminate\Contracts\View\View;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -34,7 +36,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login(BranchLogin::class)
-            ->spa(hasPrefetching: true)
+            ->spa(true, true)
             ->sidebarCollapsibleOnDesktop()
             ->unsavedChangesAlerts()
             ->globalSearch(true)
@@ -43,6 +45,10 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogoHeight('3rem')
             ->favicon(asset(config('umrah.logo_path')))
             ->darkMode(false)
+            ->renderHook(
+                PanelsRenderHook::BODY_END,
+                fn (): View => view('filament.enter-save-confirmation'),
+            )
             ->font('Cairo', asset('fonts/cairo.css'), LocalFontProvider::class)
             ->navigationGroups([
                 'الحجوزات',

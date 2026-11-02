@@ -238,7 +238,7 @@
             box-shadow: 0 1px 3px rgb(17 113 158 / 10%);
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
             .mwk-dash__primary {
                 grid-template-columns: 1fr;
             }

@@ -2,14 +2,18 @@
 
 namespace App\Filament\Widgets;
 
+use App\Actions\InvalidateDashboardCache;
 use App\Filament\Resources\Bookings\BookingResource;
 use App\Models\Booking;
 use App\Models\BookingType;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Support\Facades\Cache;
 
 class BookingTypeChart extends ChartWidget
 {
     protected static ?int $sort = 3;
+
+    protected ?string $pollingInterval = null;
 
     protected ?string $heading = 'الحجوزات حسب النوع';
 
@@ -22,38 +26,46 @@ class BookingTypeChart extends ChartWidget
 
     protected function getData(): array
     {
-        $rows = Booking::query()
-            ->forUser(auth()->user())
-            ->selectRaw('booking_type_id, count(*) as total')
-            ->groupBy('booking_type_id')
-            ->get();
+        $user = auth()->user();
+        $cacheKey = sprintf(
+            'dashboard.types.v%d.user.%d',
+            InvalidateDashboardCache::version(),
+            (int) $user?->getKey(),
+        );
+        $data = Cache::remember($cacheKey, 300, function () use ($user): array {
+            $rows = Booking::query()
+                ->forUser($user)
+                ->pluck('booking_type_id')
+                ->countBy();
+            $types = BookingType::query()
+                ->whereIn('id', $rows->keys()->filter()->all())
+                ->pluck('name', 'id');
+            $labels = [];
+            $values = [];
 
-        $typeIds = $rows->pluck('booking_type_id')->filter()->all();
-        $types = BookingType::query()->whereIn('id', $typeIds)->pluck('name', 'id');
+            foreach ($rows as $bookingTypeId => $total) {
+                if ($bookingTypeId === '') {
+                    continue;
+                }
 
-        $labels = [];
-        $data = [];
-
-        foreach ($rows as $row) {
-            if ($row->booking_type_id === null) {
-                continue;
+                $labels[] = $types[$bookingTypeId] ?? 'نوع محذوف';
+                $values[] = (int) $total;
             }
 
-            $labels[] = $types[$row->booking_type_id] ?? 'نوع محذوف';
-            $data[] = (int) $row->total;
-        }
+            $withoutType = (int) ($rows->get('') ?? 0);
 
-        $withoutType = (int) ($rows->firstWhere('booking_type_id', null)?->total ?? 0);
+            if ($withoutType > 0) {
+                $labels[] = 'بدون نوع';
+                $values[] = $withoutType;
+            }
 
-        if ($withoutType > 0) {
-            $labels[] = 'بدون نوع';
-            $data[] = $withoutType;
-        }
+            return ['labels' => $labels, 'values' => $values];
+        });
 
         return [
             'datasets' => [[
                 'label' => 'عدد الحجوزات',
-                'data' => $data,
+                'data' => $data['values'],
                 'backgroundColor' => [
                     '#0F5C4C',
                     '#C9A227',
@@ -63,7 +75,7 @@ class BookingTypeChart extends ChartWidget
                     '#8A6918',
                 ],
             ]],
-            'labels' => $labels,
+            'labels' => $data['labels'],
         ];
     }
 

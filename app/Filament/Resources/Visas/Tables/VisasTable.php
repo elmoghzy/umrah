@@ -141,7 +141,14 @@ class VisasTable
                         ->limit(1),
                 ]))
             ->defaultSort('travel_date_sort', 'asc')
-            ->persistFiltersInSession();
+            ->deferLoading(app()->isProduction())
+            ->paginated([10, 25, 50])
+            ->defaultPaginationPageOption(25)
+            ->persistFiltersInSession()
+            ->persistSearchInSession()
+            ->persistSortInSession()
+            ->searchDebounce('500ms')
+            ->deferFilters(app()->isProduction());
     }
 
     private static function bookingGroup(): Group

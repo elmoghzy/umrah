@@ -22,6 +22,7 @@
         .issued { background: #dff5e5; color: #18743a; }
         .rejected { background: #fde2e2; color: #a32929; }
         .reason { display: block; margin-top: 4px; color: #a32929; font-size: 12px; }
+        .download { display: inline-block; margin-top: 8px; padding: 6px 10px; border-radius: 8px; background: #18743a; color: #fff; text-decoration: none; font-size: 12px; }
         @media (max-width: 520px) { main { width: min(100% - 20px, 760px); margin: 20px auto; } .card { padding: 16px; } .summary { grid-template-columns: 1fr; } th, td { padding: 10px 4px; } }
     </style>
 </head>
@@ -50,6 +51,9 @@
                         <td>
                             @if ($status)
                                 <span class="status {{ $status->value }}">{{ $status->getLabel() }}</span>
+                                @if ($visa->isDownloadable())
+                                    <a class="download" href="{{ route('visas.public.download', ['token' => $booking->public_token, 'visa' => $visa]) }}">تحميل التأشيرة</a>
+                                @endif
                                 @if ($status->value === 'rejected' && filled($visa->rejected_reason))
                                     <span class="reason">السبب: {{ $visa->rejected_reason }}</span>
                                 @endif

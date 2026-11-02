@@ -63,6 +63,10 @@ class HotelRoomsReport extends Page implements HasTable
             ])
             ->deferFilters()
             ->filtersFormColumns(3)
+            ->deferLoading(app()->isProduction())
+            ->persistSearchInSession()
+            ->persistSortInSession()
+            ->searchDebounce('500ms')
             ->persistFiltersInSession()
             ->headerActions([
                 Action::make('print')->label('طباعة')->icon(Heroicon::OutlinedPrinter)->color('primary')->url(fn (): string => route('reports.hotel-rooms.print', $this->printQuery()))->openUrlInNewTab(),

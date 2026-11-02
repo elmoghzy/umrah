@@ -8,6 +8,7 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class UsersTable
 {
@@ -36,6 +37,13 @@ class UsersTable
                 DeleteAction::make()->label('حذف'),
             ])
             ->striped()
-            ->defaultSort('id', 'desc');
+            ->defaultSort('id', 'desc')
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['broker:id,name']))
+            ->deferLoading(app()->isProduction())
+            ->paginated([10, 25, 50])
+            ->defaultPaginationPageOption(25)
+            ->persistSearchInSession()
+            ->persistSortInSession()
+            ->searchDebounce('500ms');
     }
 }

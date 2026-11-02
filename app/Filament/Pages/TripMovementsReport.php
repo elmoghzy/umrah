@@ -69,6 +69,10 @@ class TripMovementsReport extends Page implements HasTable
             ])
             ->deferFilters()
             ->filtersFormColumns(3)
+            ->deferLoading(app()->isProduction())
+            ->persistSearchInSession()
+            ->persistSortInSession()
+            ->searchDebounce('500ms')
             ->persistFiltersInSession()
             ->headerActions([
                 Action::make('print')->label('طباعة')->icon(Heroicon::OutlinedPrinter)->color('primary')->url(fn (): string => route('reports.trip-movements.print', $this->printQuery()))->openUrlInNewTab(),

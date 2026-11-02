@@ -37,6 +37,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login(BranchLogin::class)
             ->spa(hasPrefetching: false)
+            ->databaseNotifications(false)
             ->sidebarCollapsibleOnDesktop()
             ->unsavedChangesAlerts()
             ->globalSearch(true)

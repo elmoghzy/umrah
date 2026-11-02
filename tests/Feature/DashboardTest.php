@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Filament\Resources\Bookings\BookingResource;
 use App\Filament\Resources\Customers\CustomerResource;
+use App\Filament\Widgets\BookingTrendChart;
 use App\Filament\Widgets\DashboardQuickActions;
 use App\Filament\Widgets\DashboardStats;
 use App\Filament\Widgets\RecentBookingsTable;
@@ -14,6 +15,7 @@ use App\Models\Hotel;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use ReflectionMethod;
 use Tests\TestCase;
 
 class DashboardTest extends TestCase
@@ -69,6 +71,38 @@ class DashboardTest extends TestCase
             ->assertSee('إجمالي المعتمرين')
             ->assertSee('تحتاج متابعة')
             ->assertSee('صافي الشهر');
+    }
+
+    public function test_dashboard_stats_cache_is_invalidated_when_booking_changes(): void
+    {
+        $guardian = Customer::create(['name_ar' => 'ولي أمر الكاش']);
+        $booking = Booking::create([
+            'customer_id' => $guardian->id,
+            'booking_number' => 20261101,
+            'net_amount' => 100,
+        ]);
+
+        Livewire::test(DashboardStats::class)
+            ->assertSee('100');
+
+        $booking->update(['net_amount' => 250]);
+
+        Livewire::test(DashboardStats::class)
+            ->assertSee('250');
+    }
+
+    public function test_booking_trend_chart_returns_counts_for_each_month(): void
+    {
+        Booking::factory()->create(['created_at' => now()->subMonths(2)->startOfMonth()->addDay()]);
+        Booking::factory()->create(['created_at' => now()->subMonths(2)->startOfMonth()->addDays(2)]);
+        Booking::factory()->create(['created_at' => now()->subMonth()->startOfMonth()->addDay()]);
+
+        $component = Livewire::test(BookingTrendChart::class)->instance();
+        $method = new ReflectionMethod($component, 'getData');
+        $method->setAccessible(true);
+        $data = $method->invoke($component);
+
+        $this->assertSame([2, 1], array_slice($data['datasets'][0]['data'], -3, 2));
     }
 
     public function test_room_availability_stats_appear_when_hotel_capacity_exists(): void

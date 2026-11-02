@@ -70,6 +70,46 @@ class VisaWorkflowTest extends TestCase
             ->assertSee('بيانات غير مكتملة');
     }
 
+    public function test_public_status_page_allows_the_booking_owner_to_download_an_issued_visa(): void
+    {
+        Storage::fake('visas');
+        $this->actingAs($this->manager());
+        $booking = $this->makeBooking();
+        $visa = $booking->visas()->firstOrFail();
+        $filePath = $this->storePdf($visa, "%PDF-1.7\npublic visa\n");
+        app(UpdateVisaStatusAction::class)->handle($visa, VisaStatus::Issued, $filePath, originalName: 'visa.pdf');
+
+        $this->get(route('visas.public', ['token' => $booking->public_token]))
+            ->assertOk()
+            ->assertSee('تحميل التأشيرة');
+
+        $this->get(route('visas.public.download', [
+            'token' => $booking->public_token,
+            'visa' => $visa,
+        ]))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/pdf')
+            ->assertHeader('Content-Disposition', 'attachment; filename=visa.pdf');
+
+        $this->assertSame(1, $visa->fresh()->downloads_count);
+    }
+
+    public function test_public_status_token_cannot_download_a_visa_from_another_booking(): void
+    {
+        Storage::fake('visas');
+        $this->actingAs($this->manager());
+        $booking = $this->makeBooking();
+        $otherBooking = $this->makeBooking();
+        $visa = $otherBooking->visas()->firstOrFail();
+        $filePath = $this->storePdf($visa, "%PDF-1.7\nprivate visa\n");
+        app(UpdateVisaStatusAction::class)->handle($visa, VisaStatus::Issued, $filePath);
+
+        $this->get(route('visas.public.download', [
+            'token' => $booking->public_token,
+            'visa' => $visa,
+        ]))->assertNotFound();
+    }
+
     public function test_issued_transition_requires_a_pdf_and_records_the_user_and_event(): void
     {
         Storage::fake('visas');

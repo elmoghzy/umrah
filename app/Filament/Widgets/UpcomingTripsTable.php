@@ -23,6 +23,12 @@ class UpcomingTripsTable extends BaseWidget
                 TextColumn::make('booking.customer.name_ar')->label('ولي الأمر'),
                 TextColumn::make('hotel.name_ar')->label('الفندق'),
                 TextColumn::make('check_in')->label('الدخول')->date(),
-            ]);
+            ])
+            ->deferLoading(app()->isProduction())
+            ->paginated([10, 25, 50])
+            ->defaultPaginationPageOption(10)
+            ->persistSearchInSession()
+            ->persistSortInSession()
+            ->searchDebounce('500ms');
     }
 }

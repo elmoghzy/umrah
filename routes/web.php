@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PublicVisaFileController;
 use App\Http\Controllers\PublicVisaStatusController;
 use App\Http\Controllers\VisaFileController;
 use App\Models\Booking;
@@ -21,6 +22,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', fn () => redirect('/admin/login'))->name('login');
 
 Route::get('/visa-status/{token}', PublicVisaStatusController::class)->name('visas.public');
+Route::get('/visa-status/{token}/download/{visa}', PublicVisaFileController::class)->name('visas.public.download');
 
 Route::middleware('auth')->get('/admin/bookings/{booking}/receipt', function (Booking $booking) {
     Gate::authorize('view', $booking);
@@ -55,7 +57,7 @@ Route::middleware('auth')->group(function (): void {
             'booking_type_id' => $request->integer('bookingTypeId') ?: null,
             'broker_id' => $request->integer('brokerId') ?: null,
             'date_range' => ['from' => $request->string('dateFrom')->toString(), 'to' => $request->string('dateTo')->toString()],
-        ])->latest('id')->get();
+        ])->latest('id')->lazy(100);
 
         return view('reports.booking-list-print', ['rows' => $rows, 'watermark' => true]);
     })->name('reports.booking-list.print');
@@ -71,7 +73,7 @@ Route::middleware('auth')->group(function (): void {
             'broker_id' => $request->integer('brokerId') ?: null,
             'airplane_id' => $request->integer('airplaneId') ?: null,
             'date_range' => ['from' => $request->string('dateFrom')->toString(), 'to' => $request->string('dateTo')->toString()],
-        ])->latest('id')->get();
+        ])->latest('id')->lazy(100);
 
         return view('reports.trip-movements-print', ['rows' => $rows, 'watermark' => false]);
     })->name('reports.trip-movements.print');
@@ -85,7 +87,7 @@ Route::middleware('auth')->group(function (): void {
             'booking_type_id' => $request->integer('bookingTypeId') ?: null,
             'broker_id' => $request->integer('brokerId') ?: null,
             'date_range' => ['from' => $request->string('dateFrom')->toString(), 'to' => $request->string('dateTo')->toString()],
-        ])->latest('id')->get();
+        ])->latest('id')->lazy(100);
 
         return view('reports.hotel-rooms-print', ['rows' => $rows, 'watermark' => true]);
     })->name('reports.hotel-rooms.print');

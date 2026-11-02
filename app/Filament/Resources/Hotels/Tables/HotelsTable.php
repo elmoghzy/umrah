@@ -9,6 +9,7 @@ use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class HotelsTable
 {
@@ -50,6 +51,13 @@ class HotelsTable
             ])
             ->striped()
             ->defaultSort('id', 'desc')
-            ->persistFiltersInSession();
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['city:id,name']))
+            ->deferLoading(app()->isProduction())
+            ->paginated([10, 25, 50])
+            ->defaultPaginationPageOption(25)
+            ->persistFiltersInSession()
+            ->persistSearchInSession()
+            ->persistSortInSession()
+            ->searchDebounce('500ms');
     }
 }

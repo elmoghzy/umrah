@@ -90,12 +90,19 @@ class BookingsTable
             ])
             ->striped()
             ->defaultSort('id', 'desc')
+            ->deferLoading(app()->isProduction())
+            ->paginated([10, 25, 50])
+            ->defaultPaginationPageOption(25)
             ->paginationMode(PaginationMode::Simple)
             ->persistFiltersInSession()
+            ->persistSearchInSession()
+            ->persistSortInSession()
+            ->searchDebounce('500ms')
+            ->deferFilters(app()->isProduction())
             ->extraAttributes([
                 'x-on:pointerdown' => <<<'JS'
                     const viewport = $event.target.closest('.fi-ta-content-ctn');
-                    const isInteractive = $event.target.closest('button, a, input, select, textarea, label, [role="button"], [contenteditable="true"]');
+                    const isInteractive = $event.target.closest(`button, a, input, select, textarea, label, [role='button'], [contenteditable='true']`);
 
                     if ($event.pointerType !== 'mouse' || $event.button !== 0 || isInteractive || !viewport || viewport.scrollWidth <= viewport.clientWidth) {
                         return;

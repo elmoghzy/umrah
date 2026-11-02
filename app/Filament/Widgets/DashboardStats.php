@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Actions\InvalidateDashboardCache;
 use App\Filament\Resources\Bookings\BookingResource;
 use App\Filament\Resources\Customers\CustomerResource;
 use App\Models\Booking;
@@ -10,11 +11,14 @@ use App\Models\Hotel;
 use App\Models\Room;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Number;
 
 class DashboardStats extends StatsOverviewWidget
 {
     protected static ?int $sort = 1;
+
+    protected ?string $pollingInterval = null;
 
     protected int|string|array $columnSpan = 'full';
 
@@ -26,44 +30,77 @@ class DashboardStats extends StatsOverviewWidget
     protected function getStats(): array
     {
         $stats = [];
+        $user = auth()->user();
+        $canViewBookings = BookingResource::canViewAny();
+        $canViewCustomers = CustomerResource::canViewAny();
+        $cacheKey = sprintf(
+            'dashboard.stats.v%d.user.%d.day.%s.month.%s',
+            InvalidateDashboardCache::version(),
+            (int) $user?->getKey(),
+            today()->toDateString(),
+            now()->format('Y-m'),
+        );
+        $metrics = Cache::remember($cacheKey, 300, function () use ($user, $canViewBookings, $canViewCustomers): array {
+            $metrics = [];
 
-        if (BookingResource::canViewAny()) {
-            $totalBookings = Booking::query()->forUser(auth()->user())->count();
-            $todaysBookings = Booking::query()
-                ->forUser(auth()->user())
-                ->whereBetween('created_at', [today()->startOfDay(), today()->endOfDay()])
-                ->count();
-            $monthNet = (float) Booking::query()
-                ->forUser(auth()->user())
-                ->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
-                ->sum('net_amount');
-            $needsFollowUp = Booking::query()
-                ->forUser(auth()->user())
-                ->where(function ($query): void {
-                    $query
-                        ->whereDoesntHave('details')
-                        ->orWhereDoesntHave('residents');
-                })
-                ->count();
+            if ($canViewBookings) {
+                $metrics['total_bookings'] = Booking::query()->forUser($user)->count();
+                $metrics['todays_bookings'] = Booking::query()
+                    ->forUser($user)
+                    ->whereBetween('created_at', [today()->startOfDay(), today()->endOfDay()])
+                    ->count();
+                $metrics['month_net'] = (float) Booking::query()
+                    ->forUser($user)
+                    ->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
+                    ->sum('net_amount');
+                $metrics['needs_follow_up'] = Booking::query()
+                    ->forUser($user)
+                    ->where(function ($query): void {
+                        $query
+                            ->whereDoesntHave('details')
+                            ->orWhereDoesntHave('residents');
+                    })
+                    ->count();
+            }
 
-            $stats[] = Stat::make('إجمالي الحجوزات', number_format($totalBookings))
+            if ($canViewCustomers) {
+                $metrics['residents'] = Customer::query()->whereNotNull('guardian_id')->count();
+            }
+
+            if ($canViewBookings && $user?->isMainAdmin()) {
+                $metrics['hotel_capacity'] = (int) Hotel::query()->sum('rooms_count');
+                $metrics['occupied_rooms'] = Room::query()
+                    ->whereHas('bookingDetail', function ($query) use ($user): void {
+                        $query
+                            ->whereHas('booking', fn ($booking) => $booking->forUser($user))
+                            ->where('check_in', '<=', today())
+                            ->where('check_out', '>=', today());
+                    })
+                    ->count();
+            }
+
+            return $metrics;
+        });
+
+        if ($canViewBookings) {
+            $stats[] = Stat::make('إجمالي الحجوزات', number_format($metrics['total_bookings']))
                 ->description('كل الحجوزات المسجّلة')
                 ->descriptionIcon('heroicon-m-clipboard-document-list')
                 ->color('primary')
                 ->url(BookingResource::getUrl());
 
-            $stats[] = Stat::make('حجوزات اليوم', number_format($todaysBookings))
+            $stats[] = Stat::make('حجوزات اليوم', number_format($metrics['todays_bookings']))
                 ->description('أُنشئت اليوم')
                 ->descriptionIcon('heroicon-m-calendar-days')
                 ->color('warning');
 
-            $stats[] = Stat::make('تحتاج متابعة', number_format($needsFollowUp))
+            $stats[] = Stat::make('تحتاج متابعة', number_format($metrics['needs_follow_up']))
                 ->description('بدون إقامة أو بدون معتمرين')
                 ->descriptionIcon('heroicon-m-exclamation-triangle')
-                ->color($needsFollowUp > 0 ? 'danger' : 'success');
+                ->color($metrics['needs_follow_up'] > 0 ? 'danger' : 'success');
 
             $stats[] = Stat::make('صافي الشهر', Number::currency(
-                $monthNet,
+                $metrics['month_net'],
                 config('umrah.currency_code'),
                 config('umrah.currency_locale'),
                 (int) config('umrah.currency_decimal_places'),
@@ -73,30 +110,19 @@ class DashboardStats extends StatsOverviewWidget
                 ->color('success');
         }
 
-        if (CustomerResource::canViewAny()) {
-            $residents = Customer::query()->whereNotNull('guardian_id')->count();
-
-            $stats[] = Stat::make('إجمالي المعتمرين', number_format($residents))
+        if ($canViewCustomers) {
+            $stats[] = Stat::make('إجمالي المعتمرين', number_format($metrics['residents']))
                 ->description('المسجّلون تحت أولياء الأمور')
                 ->descriptionIcon('heroicon-m-users')
                 ->color('primary')
                 ->url(CustomerResource::getUrl());
         }
 
-        if (BookingResource::canViewAny()) {
-            $hotelCapacity = auth()->user()?->isMainAdmin()
-                ? (int) Hotel::query()->sum('rooms_count')
-                : 0;
+        if ($canViewBookings) {
+            $hotelCapacity = $metrics['hotel_capacity'] ?? 0;
 
             if ($hotelCapacity > 0) {
-                $occupiedRooms = Room::query()
-                    ->whereHas('bookingDetail', function ($query): void {
-                        $query
-                            ->whereHas('booking', fn ($booking) => $booking->forUser(auth()->user()))
-                            ->where('check_in', '<=', today())
-                            ->where('check_out', '>=', today());
-                    })
-                    ->count();
+                $occupiedRooms = $metrics['occupied_rooms'];
 
                 $availableRooms = max(0, $hotelCapacity - $occupiedRooms);
 

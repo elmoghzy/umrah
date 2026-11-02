@@ -43,6 +43,12 @@ class MealsTable
             ])
             ->striped()
             ->defaultSort('id', 'desc')
-            ->persistFiltersInSession();
+            ->deferLoading(app()->isProduction())
+            ->paginated([10, 25, 50])
+            ->defaultPaginationPageOption(25)
+            ->persistFiltersInSession()
+            ->persistSearchInSession()
+            ->persistSortInSession()
+            ->searchDebounce('500ms');
     }
 }

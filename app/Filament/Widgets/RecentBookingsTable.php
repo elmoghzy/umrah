@@ -72,7 +72,11 @@ class RecentBookingsTable extends BaseWidget
                     ->url(fn (Booking $record): string => BookingResource::getUrl('view', ['record' => $record])),
             ])
             ->recordUrl(fn (Booking $record): string => BookingResource::getUrl('view', ['record' => $record]))
+            ->deferLoading(app()->isProduction())
             ->paginated([5, 10])
+            ->persistSearchInSession()
+            ->persistSortInSession()
+            ->searchDebounce('500ms')
             ->defaultPaginationPageOption(5)
             ->emptyStateHeading('لا توجد حجوزات بعد')
             ->emptyStateDescription('ستظهر الحجوزات الجديدة هنا فور حفظها.')

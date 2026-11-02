@@ -72,13 +72,6 @@ class VisasRelationManager extends RelationManager
             ])
             ->modifyQueryUsing(fn (Builder $query): Builder => $query
                 ->with(['customer', 'booking', 'latestEvent.user'])
-                ->orderBy(
-                    Visa::query()
-                        ->select('id')
-                        ->whereColumn('id', 'visas.id')
-                        ->where('customer_id', $this->getOwnerRecord()->customer_id),
-                    'desc',
-                )
                 ->orderBy('id', 'asc'));
     }
 

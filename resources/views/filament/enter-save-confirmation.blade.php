@@ -15,6 +15,10 @@
         ].join(';');
         document.body.append(navigationOverlay);
 
+        const hideNavigationOverlay = () => {
+            navigationOverlay.style.display = 'none';
+        };
+
         const showNavigationOverlay = () => {
             if (! navigationOverlay.isConnected) {
                 document.body.append(navigationOverlay);
@@ -25,9 +29,9 @@
 
         document.addEventListener('livewire:navigate', showNavigationOverlay);
 
-        document.addEventListener('livewire:navigated', () => {
-            navigationOverlay.style.display = 'none';
-        });
+        document.addEventListener('livewire:navigated', hideNavigationOverlay);
+        window.addEventListener('pageshow', hideNavigationOverlay);
+        window.addEventListener('popstate', hideNavigationOverlay);
 
         document.addEventListener('submit', (event) => {
             const form = event.target;

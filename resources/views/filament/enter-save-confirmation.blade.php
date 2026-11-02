@@ -19,16 +19,6 @@
             navigationOverlay.style.display = 'none';
         };
 
-        const showNavigationOverlay = () => {
-            if (! navigationOverlay.isConnected) {
-                document.body.append(navigationOverlay);
-            }
-
-            navigationOverlay.style.display = 'block';
-        };
-
-        document.addEventListener('livewire:navigate', showNavigationOverlay);
-
         document.addEventListener('livewire:navigated', hideNavigationOverlay);
         window.addEventListener('pageshow', () => {
             window.setTimeout(hideNavigationOverlay, 0);

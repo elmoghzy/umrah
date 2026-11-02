@@ -2,6 +2,33 @@
     if (! window.__umrahSaveConfirmationBound) {
         window.__umrahSaveConfirmationBound = true;
 
+        const navigationOverlay = document.createElement('div');
+        navigationOverlay.setAttribute('aria-busy', 'true');
+        navigationOverlay.setAttribute('aria-label', 'جارٍ تحميل الصفحة');
+        navigationOverlay.style.cssText = [
+            'display:none',
+            'position:fixed',
+            'inset:0',
+            'z-index:9999',
+            'cursor:wait',
+            'background:rgba(255,255,255,.35)',
+        ].join(';');
+        document.body.append(navigationOverlay);
+
+        const showNavigationOverlay = () => {
+            if (! navigationOverlay.isConnected) {
+                document.body.append(navigationOverlay);
+            }
+
+            navigationOverlay.style.display = 'block';
+        };
+
+        document.addEventListener('livewire:navigate', showNavigationOverlay);
+
+        document.addEventListener('livewire:navigated', () => {
+            navigationOverlay.style.display = 'none';
+        });
+
         document.addEventListener('submit', (event) => {
             const form = event.target;
 

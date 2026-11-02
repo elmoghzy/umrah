@@ -69,7 +69,11 @@ class BookingsTable
                         ->when($data['until'] ?? null, fn (Builder $query, $date): Builder => $query->whereHas('details', fn (Builder $details): Builder => $details->where('check_in', '<=', $date)))),
             ])
             ->modifyQueryUsing(fn (Builder $query): Builder => $query
-                ->with(['broker', 'customer', 'bookingType'])
+                ->with([
+                    'broker:id,name',
+                    'customer:id,name_ar',
+                    'bookingType:id,name',
+                ])
                 ->withCount([
                     'visas as visas_total_count',
                     'visas as visas_issued_count' => fn (Builder $visas): Builder => $visas->where('status', VisaStatus::Issued->value),

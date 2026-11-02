@@ -1,32 +1,36 @@
 <script>
-    document.addEventListener('submit', (event) => {
-        const form = event.target;
+    if (! window.__umrahSaveConfirmationBound) {
+        window.__umrahSaveConfirmationBound = true;
 
-        if (!(form instanceof HTMLFormElement)) {
-            return;
-        }
+        document.addEventListener('submit', (event) => {
+            const form = event.target;
 
-        const submitAttribute = Array.from(form.attributes)
-            .find((attribute) => attribute.name.startsWith('wire:submit'));
+            if (!(form instanceof HTMLFormElement)) {
+                return;
+            }
 
-        if (! submitAttribute || ! /^(create|save|update)$/.test(submitAttribute.value.trim())) {
-            return;
-        }
+            const submitAttribute = Array.from(form.attributes)
+                .find((attribute) => attribute.name.startsWith('wire:submit'));
 
-        if (form.dataset.confirmedSubmit === 'true') {
-            delete form.dataset.confirmedSubmit;
-            return;
-        }
+            if (! submitAttribute || ! /^(create|save|update)$/.test(submitAttribute.value.trim())) {
+                return;
+            }
 
-        event.preventDefault();
+            if (form.dataset.confirmedSubmit === 'true') {
+                delete form.dataset.confirmedSubmit;
+                return;
+            }
 
-        if (! window.confirm('هل أنت متأكد من حفظ البيانات؟')) {
-            event.stopImmediatePropagation();
-            event.stopPropagation();
-            return;
-        }
+            event.preventDefault();
 
-        form.dataset.confirmedSubmit = 'true';
-        form.requestSubmit();
-    }, true);
+            if (! window.confirm('هل أنت متأكد من حفظ البيانات؟')) {
+                event.stopImmediatePropagation();
+                event.stopPropagation();
+                return;
+            }
+
+            form.dataset.confirmedSubmit = 'true';
+            form.requestSubmit();
+        }, true);
+    }
 </script>

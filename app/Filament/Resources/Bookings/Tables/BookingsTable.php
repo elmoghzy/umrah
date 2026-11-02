@@ -12,7 +12,6 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
-use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -46,12 +45,7 @@ class BookingsTable
                         locale: config('umrah.currency_locale'),
                         decimalPlaces: (int) config('umrah.currency_decimal_places'),
                     )
-                    ->sortable()
-                    ->summarize(Sum::make()->money(
-                        config('umrah.currency_code'),
-                        locale: config('umrah.currency_locale'),
-                        decimalPlaces: (int) config('umrah.currency_decimal_places'),
-                    )),
+                    ->sortable(),
             ])
             ->filters([
                 TrashedFilter::make(),
@@ -79,7 +73,6 @@ class BookingsTable
                     'visas as visas_total_count',
                     'visas as visas_issued_count' => fn (Builder $visas): Builder => $visas->where('status', VisaStatus::Issued->value),
                 ]))
-            ->summaries(allTableCondition: false)
             ->recordActions([
                 ViewAction::make()->label('عرض'),
                 ...SimpleResourceTableActions::recordActions(),

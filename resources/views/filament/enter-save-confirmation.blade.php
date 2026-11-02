@@ -30,8 +30,12 @@
         document.addEventListener('livewire:navigate', showNavigationOverlay);
 
         document.addEventListener('livewire:navigated', hideNavigationOverlay);
-        window.addEventListener('pageshow', hideNavigationOverlay);
-        window.addEventListener('popstate', hideNavigationOverlay);
+        window.addEventListener('pageshow', () => {
+            window.setTimeout(hideNavigationOverlay, 0);
+        });
+        window.addEventListener('popstate', () => {
+            window.setTimeout(hideNavigationOverlay, 0);
+        });
 
         document.addEventListener('submit', (event) => {
             const form = event.target;

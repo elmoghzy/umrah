@@ -8,6 +8,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\PaginationMode;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
@@ -21,7 +22,7 @@ class CustomersTable
             ->columns([
                 TextColumn::make('guardian.name_ar')
                     ->label('ولي الأمر')
-                    ->searchable(),
+                    ->searchable(false),
                 TextColumn::make('name_ar')
                     ->label('الاسم بالعربية')
                     ->searchable(),
@@ -65,6 +66,16 @@ class CustomersTable
             ])
             ->striped()
             ->defaultSort('id', 'desc')
-            ->persistFiltersInSession();
+            ->deferLoading(app()->isProduction())
+            ->paginated([10, 25, 50])
+            ->defaultPaginationPageOption(25)
+            ->paginationMode(PaginationMode::Simple)
+            ->persistFiltersInSession()
+            ->persistSearchInSession()
+            ->persistSortInSession()
+            ->searchDebounce('500ms')
+            ->searchOnBlur()
+            ->splitSearchTerms(false)
+            ->deferFilters(app()->isProduction());
     }
 }

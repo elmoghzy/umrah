@@ -28,6 +28,10 @@ class MealResource extends Resource
 
     protected static ?string $navigationLabel = 'الوجبات';
 
+    protected static ?string $modelLabel = 'وجبة';
+
+    protected static ?string $pluralModelLabel = 'الوجبات';
+
     public static function form(Schema $schema): Schema
     {
         return MealForm::configure($schema);

@@ -28,6 +28,10 @@ class CompanyResource extends Resource
 
     protected static ?string $navigationLabel = 'الشركات';
 
+    protected static ?string $modelLabel = 'شركة';
+
+    protected static ?string $pluralModelLabel = 'الشركات';
+
     public static function form(Schema $schema): Schema
     {
         return CompanyForm::configure($schema);

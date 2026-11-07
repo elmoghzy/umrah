@@ -28,6 +28,10 @@ class RoomTypeResource extends Resource
 
     protected static ?string $navigationLabel = 'أنواع الغرف';
 
+    protected static ?string $modelLabel = 'نوع غرفة';
+
+    protected static ?string $pluralModelLabel = 'أنواع الغرف';
+
     public static function form(Schema $schema): Schema
     {
         return RoomTypeForm::configure($schema);

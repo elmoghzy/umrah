@@ -28,6 +28,10 @@ class AirplaneResource extends Resource
 
     protected static ?string $navigationLabel = 'الطائرات';
 
+    protected static ?string $modelLabel = 'طائرة';
+
+    protected static ?string $pluralModelLabel = 'الطائرات';
+
     public static function form(Schema $schema): Schema
     {
         return AirplaneForm::configure($schema);

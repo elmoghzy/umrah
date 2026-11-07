@@ -28,6 +28,10 @@ class CityResource extends Resource
 
     protected static ?string $navigationLabel = 'المدن';
 
+    protected static ?string $modelLabel = 'مدينة';
+
+    protected static ?string $pluralModelLabel = 'المدن';
+
     public static function form(Schema $schema): Schema
     {
         return CityForm::configure($schema);

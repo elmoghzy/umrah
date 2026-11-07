@@ -11,6 +11,11 @@ use App\Models\Room;
 use App\Models\RoomResident;
 use App\Models\Visa;
 use App\Observers\DashboardCacheObserver;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Field;
+use Filament\Infolists\Components\Entry;
+use Filament\Tables\Columns\Column;
+use Filament\Tables\Filters\BaseFilter;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -28,6 +33,26 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Field::configureUsing(
+            fn (Field $field): Field => $field->translateLabel(),
+        );
+
+        Column::configureUsing(
+            fn (Column $column): Column => $column->translateLabel(),
+        );
+
+        BaseFilter::configureUsing(
+            fn (BaseFilter $filter): BaseFilter => $filter->translateLabel(),
+        );
+
+        Action::configureUsing(
+            fn (Action $action): Action => $action->translateLabel(),
+        );
+
+        Entry::configureUsing(
+            fn (Entry $entry): Entry => $entry->translateLabel(),
+        );
+
         foreach ([
             Booking::class,
             BookingDetail::class,

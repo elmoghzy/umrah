@@ -28,6 +28,10 @@ class HotelResource extends Resource
 
     protected static ?string $navigationLabel = 'الفنادق';
 
+    protected static ?string $modelLabel = 'فندق';
+
+    protected static ?string $pluralModelLabel = 'الفنادق';
+
     public static function form(Schema $schema): Schema
     {
         return HotelForm::configure($schema);

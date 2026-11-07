@@ -28,6 +28,10 @@ class BookingTypeResource extends Resource
 
     protected static ?string $navigationLabel = 'أنواع الحجوزات';
 
+    protected static ?string $modelLabel = 'نوع حجز';
+
+    protected static ?string $pluralModelLabel = 'أنواع الحجوزات';
+
     public static function form(Schema $schema): Schema
     {
         return BookingTypeForm::configure($schema);

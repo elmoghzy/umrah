@@ -73,7 +73,6 @@ class CustomersTable
             ->persistSearchInSession()
             ->persistSortInSession()
             ->searchDebounce('500ms')
-            ->splitSearchTerms(false)
             ->deferFilters(app()->isProduction());
     }
 }

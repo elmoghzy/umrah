@@ -42,7 +42,7 @@ class BookingsReport extends Page implements HasTable
             ->columns([
                 TextColumn::make('booking.booking_number')->label('رقم الحجز')->sortable()->searchable(),
                 TextColumn::make('booking.broker.name')->label('الفرع')->placeholder('الفرع الرئيسي')->sortable()->searchable(),
-                TextColumn::make('booking.customer.name_ar')->label('ولي الأمر')->searchable(),
+                TextColumn::make('booking.customer.name_ar')->label('ولي الأمر')->searchable(['name_ar', 'name_en', 'phone']),
                 TextColumn::make('resident_names')
                     ->label('المعتمرون')
                     ->state(fn (Model $record): array => $record->booking->residents->pluck('customer.name_ar')->all())
@@ -52,7 +52,8 @@ class BookingsReport extends Page implements HasTable
                         fn (Builder $customer): Builder => $customer->where(
                             fn (Builder $names): Builder => $names
                                 ->where('name_ar', 'like', "%{$search}%")
-                                ->orWhere('name_en', 'like', "%{$search}%"),
+                                ->orWhere('name_en', 'like', "%{$search}%")
+                                ->orWhere('phone', 'like', "%{$search}%"),
                         ),
                     )),
                 TextColumn::make('city.name')->label('المدينة')->sortable()->searchable(),

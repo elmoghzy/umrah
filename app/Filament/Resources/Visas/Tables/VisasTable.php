@@ -32,7 +32,7 @@ class VisasTable
             ->columns([
                 TextColumn::make('customer.name_ar')
                     ->label('اسم المعتمر')
-                    ->searchable()
+                    ->searchable(['name_ar', 'name_en', 'phone'])
                     ->sortable(),
                 TextColumn::make('relation')
                     ->label('الصفة')
@@ -46,6 +46,7 @@ class VisasTable
                 TextColumn::make('booking.broker.name')
                     ->label('الفرع')
                     ->placeholder('الفرع الرئيسي')
+                    ->searchable()
                     ->visible(fn (): bool => auth()->user()?->isMainAdmin() ?? false),
                 TextColumn::make('status')
                     ->label('الحالة')

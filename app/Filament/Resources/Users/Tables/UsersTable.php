@@ -26,7 +26,7 @@ class UsersTable
                         User::ROLE_BRANCH_EMPLOYEE => 'مستخدم',
                         default => $state,
                     }),
-                TextColumn::make('broker.name')->label('الفرع')->placeholder('الفرع الرئيسي'),
+                TextColumn::make('broker.name')->label('الفرع')->placeholder('الفرع الرئيسي')->searchable(),
                 IconColumn::make('is_active')->label('نشط')->boolean(),
             ])
             ->filters([

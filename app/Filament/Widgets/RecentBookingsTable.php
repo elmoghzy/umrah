@@ -41,7 +41,7 @@ class RecentBookingsTable extends BaseWidget
                 TextColumn::make('customer.name_ar')
                     ->label('ولي الأمر')
                     ->placeholder('—')
-                    ->searchable(),
+                    ->searchable(['name_ar', 'name_en', 'phone']),
                 TextColumn::make('residents_count')
                     ->label('المعتمرون')
                     ->numeric()

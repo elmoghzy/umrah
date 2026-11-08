@@ -44,7 +44,7 @@ class VisasRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('customer.name_ar')
                     ->label('المعتمر')
-                    ->searchable(),
+                    ->searchable(['name_ar', 'name_en', 'phone']),
                 TextColumn::make('relation')
                     ->label('الصفة')
                     ->state(fn (Visa $record): string => $record->customer_id === $record->booking?->customer_id ? 'ولي الأمر' : 'مرافق')

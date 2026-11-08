@@ -28,7 +28,7 @@ class BookingsTable
             ->columns([
                 TextColumn::make('booking_number')->label('رقم الحجز')->searchable()->sortable(),
                 TextColumn::make('broker.name')->label('الفرع')->placeholder('الفرع الرئيسي')->sortable()->searchable(),
-                TextColumn::make('customer.name_ar')->label('ولي الأمر')->searchable(),
+                TextColumn::make('customer.name_ar')->label('ولي الأمر')->searchable(['name_ar', 'name_en', 'phone']),
                 TextColumn::make('bookingType.name')->label('النوع')->searchable(),
                 TextColumn::make('stay_scope')->label('النطاق')->badge(),
                 TextColumn::make('residents_count')->label('عدد المعتمرين')->counts('residents'),

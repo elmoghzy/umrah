@@ -26,19 +26,6 @@ class BookingResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'booking_number';
 
-    /** @return array<string> */
-    public static function getGloballySearchableAttributes(): array
-    {
-        return [
-            'booking_number',
-            'customer.name_ar',
-            'customer.name_en',
-            'customer.phone',
-            'bookingType.name',
-            'broker.name',
-        ];
-    }
-
     protected static string|\UnitEnum|null $navigationGroup = 'الحجوزات';
 
     protected static ?string $navigationLabel = 'الحجوزات';

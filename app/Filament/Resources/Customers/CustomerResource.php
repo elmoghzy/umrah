@@ -26,12 +26,6 @@ class CustomerResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name_ar';
 
-    /** @return array<string> */
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['name_ar', 'name_en', 'phone'];
-    }
-
     protected static string|\UnitEnum|null $navigationGroup = 'الحجوزات';
 
     protected static ?string $navigationLabel = 'أولياء الأمور';

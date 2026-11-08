@@ -40,7 +40,7 @@ class AdminPanelProvider extends PanelProvider
             ->databaseNotifications(false)
             ->sidebarCollapsibleOnDesktop()
             ->unsavedChangesAlerts()
-            ->globalSearch(true)
+            ->globalSearch(false)
             ->brandName('مواكب لإدارة العمرة')
             ->brandLogo(asset(config('umrah.logo_path')))
             ->brandLogoHeight('3rem')

@@ -41,9 +41,9 @@ class HotelRoomsReport extends Page implements HasTable
             ->query(HotelRoomsQuery::make())
             ->columns([
                 TextColumn::make('booking.booking_number')->label('رقم الحجز')->sortable()->searchable(),
-                TextColumn::make('booking.broker.name')->label('الفرع')->placeholder('الفرع الرئيسي')->sortable(),
-                TextColumn::make('booking.bookingType.name')->label('النوع')->sortable(),
-                TextColumn::make('booking.customer.name_ar')->label('ولي الأمر')->searchable(),
+                TextColumn::make('booking.broker.name')->label('الفرع')->placeholder('الفرع الرئيسي')->sortable()->searchable(),
+                TextColumn::make('booking.bookingType.name')->label('النوع')->sortable()->searchable(),
+                TextColumn::make('booking.customer.name_ar')->label('ولي الأمر')->searchable(['name_ar', 'name_en', 'phone']),
                 TextColumn::make('check_in')->label('الدخول')->date('d/m/Y')->sortable(),
                 TextColumn::make('check_out')->label('الخروج')->date('d/m/Y')->sortable(),
                 TextColumn::make('rooms_count')->label('عدد الغرف')->sortable()->summarize(Sum::make()),

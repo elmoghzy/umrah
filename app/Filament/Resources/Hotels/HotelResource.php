@@ -24,12 +24,6 @@ class HotelResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name_ar';
 
-    /** @return array<string> */
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['name_ar', 'name_en', 'city.name'];
-    }
-
     protected static string|\UnitEnum|null $navigationGroup = 'البيانات الأساسية';
 
     protected static ?string $navigationLabel = 'الفنادق';

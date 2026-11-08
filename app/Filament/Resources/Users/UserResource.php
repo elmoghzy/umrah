@@ -22,6 +22,12 @@ class UserResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    /** @return array<string> */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'email', 'job'];
+    }
+
     protected static string|\UnitEnum|null $navigationGroup = 'الإعدادات';
 
     protected static ?string $navigationLabel = 'المستخدمون';

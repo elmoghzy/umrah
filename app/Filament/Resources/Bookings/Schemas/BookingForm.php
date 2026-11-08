@@ -109,18 +109,17 @@ class BookingForm
                         ->prefixIcon(Heroicon::OutlinedHashtag)
                         ->disabled()
                         ->dehydrated(false),
-                    Select::make('booking_type_id')->label('نوع الحجز')->relationship('bookingType', 'name')->searchable()->preload(),
+                    Select::make('booking_type_id')->label('نوع الحجز')->relationship('bookingType', 'name')->searchable(),
                     Select::make('broker_id')
                         ->label('الفرع')
                         ->relationship('broker', 'name')
                         ->searchable()
-                        ->preload()
                         ->visible(fn (): bool => auth()->user()?->isMainAdmin() ?? false),
                     Placeholder::make('assigned_branch')
                         ->label('الفرع')
                         ->content(fn (): string => auth()->user()?->broker?->name ?? 'الفرع غير محدد')
                         ->visible(fn (): bool => auth()->user() !== null && ! auth()->user()->isMainAdmin()),
-                    Select::make('airplane_id')->label('الطيران')->relationship('airplane', 'name')->searchable()->preload(),
+                    Select::make('airplane_id')->label('الطيران')->relationship('airplane', 'name')->searchable(),
                 ])->columns(2),
                 Section::make('المعتمرون التابعون')
                     ->schema([

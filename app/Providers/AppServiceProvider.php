@@ -16,6 +16,7 @@ use Filament\Forms\Components\Field;
 use Filament\Infolists\Components\Entry;
 use Filament\Tables\Columns\Column;
 use Filament\Tables\Filters\BaseFilter;
+use Filament\Tables\Table;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -33,6 +34,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Table::configureUsing(
+            fn (Table $table): Table => $table
+                ->defaultPaginationPageOption(10)
+                ->persistRecordsPerPageInSession(false),
+        );
+
         Field::configureUsing(
             fn (Field $field): Field => $field->translateLabel(),
         );

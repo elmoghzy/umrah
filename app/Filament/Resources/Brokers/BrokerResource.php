@@ -24,6 +24,12 @@ class BrokerResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    /** @return array<string> */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'contact_name', 'contact_phone'];
+    }
+
     protected static string|\UnitEnum|null $navigationGroup = 'البيانات الأساسية';
 
     protected static ?string $navigationLabel = 'الفروع';

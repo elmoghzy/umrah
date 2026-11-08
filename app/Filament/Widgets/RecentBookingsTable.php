@@ -77,7 +77,6 @@ class RecentBookingsTable extends BaseWidget
             ->persistSearchInSession()
             ->persistSortInSession()
             ->searchDebounce('500ms')
-            ->defaultPaginationPageOption(5)
             ->emptyStateHeading('لا توجد حجوزات بعد')
             ->emptyStateDescription('ستظهر الحجوزات الجديدة هنا فور حفظها.')
             ->emptyStateIcon('heroicon-o-clipboard-document-list');

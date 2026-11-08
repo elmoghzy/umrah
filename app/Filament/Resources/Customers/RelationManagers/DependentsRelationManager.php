@@ -103,7 +103,6 @@ class DependentsRelationManager extends RelationManager
             ->defaultSort('id', 'desc')
             ->deferLoading(app()->isProduction())
             ->paginated([10, 25, 50])
-            ->defaultPaginationPageOption(25)
             ->persistSearchInSession()
             ->persistSortInSession()
             ->searchDebounce('500ms')

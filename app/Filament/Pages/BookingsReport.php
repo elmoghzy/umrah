@@ -41,14 +41,25 @@ class BookingsReport extends Page implements HasTable
             ->query(BookingListQuery::make())
             ->columns([
                 TextColumn::make('booking.booking_number')->label('رقم الحجز')->sortable()->searchable(),
-                TextColumn::make('booking.broker.name')->label('الفرع')->placeholder('الفرع الرئيسي')->sortable(),
+                TextColumn::make('booking.broker.name')->label('الفرع')->placeholder('الفرع الرئيسي')->sortable()->searchable(),
                 TextColumn::make('booking.customer.name_ar')->label('ولي الأمر')->searchable(),
-                TextColumn::make('resident_names')->label('المعتمرون')->state(fn (Model $record): array => $record->booking->residents->pluck('customer.name_ar')->all())->listWithLineBreaks(),
-                TextColumn::make('city.name')->label('المدينة')->sortable(),
+                TextColumn::make('resident_names')
+                    ->label('المعتمرون')
+                    ->state(fn (Model $record): array => $record->booking->residents->pluck('customer.name_ar')->all())
+                    ->listWithLineBreaks()
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $query->whereHas(
+                        'booking.residents.customer',
+                        fn (Builder $customer): Builder => $customer->where(
+                            fn (Builder $names): Builder => $names
+                                ->where('name_ar', 'like', "%{$search}%")
+                                ->orWhere('name_en', 'like', "%{$search}%"),
+                        ),
+                    )),
+                TextColumn::make('city.name')->label('المدينة')->sortable()->searchable(),
                 TextColumn::make('hotel.name_ar')->label('الفندق')->sortable()->searchable(),
-                TextColumn::make('meal.name')->label('الوجبة')->sortable(),
+                TextColumn::make('meal.name')->label('الوجبة')->sortable()->searchable(),
                 TextColumn::make('check_in')->label('الدخول')->date('d/m/Y')->sortable(),
-                TextColumn::make('booking.notes')->label('الملاحظة')->wrap(),
+                TextColumn::make('booking.notes')->label('الملاحظة')->wrap()->searchable(),
             ])
             ->filters([
                 SelectFilter::make('hotel_id')->label('الفندق')->options(fn (): array => Hotel::query()->orderBy('name_ar')->pluck('name_ar', 'id')->all())->searchable()->preload(),
@@ -75,7 +86,6 @@ class BookingsReport extends Page implements HasTable
             ])
             ->striped()
             ->paginated([10, 25, 50])
-            ->defaultPaginationPageOption(25)
             ->defaultSort('id', 'desc')
             ->emptyStateHeading('لا توجد نتائج');
     }

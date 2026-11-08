@@ -19,14 +19,13 @@ class UpcomingTripsTable extends BaseWidget
         return $table
             ->query(BookingDetail::query()->whereHas('booking', fn (Builder $booking): Builder => $booking->forUser(auth()->user()))->with(['booking.customer', 'hotel'])->whereBetween('check_in', [today(), today()->addDays(30)])->orderBy('check_in'))
             ->columns([
-                TextColumn::make('booking.booking_number')->label('رقم الحجز'),
-                TextColumn::make('booking.customer.name_ar')->label('ولي الأمر'),
-                TextColumn::make('hotel.name_ar')->label('الفندق'),
+                TextColumn::make('booking.booking_number')->label('رقم الحجز')->searchable(),
+                TextColumn::make('booking.customer.name_ar')->label('ولي الأمر')->searchable(),
+                TextColumn::make('hotel.name_ar')->label('الفندق')->searchable(),
                 TextColumn::make('check_in')->label('الدخول')->date(),
             ])
             ->deferLoading(app()->isProduction())
             ->paginated([10, 25, 50])
-            ->defaultPaginationPageOption(10)
             ->persistSearchInSession()
             ->persistSortInSession()
             ->searchDebounce('500ms');

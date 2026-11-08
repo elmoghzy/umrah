@@ -20,6 +20,14 @@ class TransportResource extends Resource
 {
     protected static ?string $model = Transport::class;
 
+    protected static ?string $recordTitleAttribute = 'name';
+
+    /** @return array<string> */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'note'];
+    }
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTruck;
 
     protected static string|\UnitEnum|null $navigationGroup = 'البيانات الأساسية';

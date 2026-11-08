@@ -143,7 +143,6 @@ class VisasTable
             ->defaultSort('travel_date_sort', 'asc')
             ->deferLoading(app()->isProduction())
             ->paginated([10, 25, 50])
-            ->defaultPaginationPageOption(25)
             ->persistFiltersInSession()
             ->persistSearchInSession()
             ->persistSortInSession()

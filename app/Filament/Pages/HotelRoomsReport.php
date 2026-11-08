@@ -73,7 +73,6 @@ class HotelRoomsReport extends Page implements HasTable
             ])
             ->striped()
             ->paginated([10, 25, 50])
-            ->defaultPaginationPageOption(25)
             ->defaultSort('id', 'desc')
             ->emptyStateHeading('لا توجد نتائج');
     }

@@ -27,7 +27,7 @@ class BookingsTable
         return $table
             ->columns([
                 TextColumn::make('booking_number')->label('رقم الحجز')->searchable()->sortable(),
-                TextColumn::make('broker.name')->label('الفرع')->placeholder('الفرع الرئيسي')->sortable(),
+                TextColumn::make('broker.name')->label('الفرع')->placeholder('الفرع الرئيسي')->sortable()->searchable(),
                 TextColumn::make('customer.name_ar')->label('ولي الأمر')->searchable(),
                 TextColumn::make('bookingType.name')->label('النوع')->searchable(),
                 TextColumn::make('stay_scope')->label('النطاق')->badge(),
@@ -91,7 +91,6 @@ class BookingsTable
             ->striped()
             ->defaultSort('id', 'desc')
             ->paginated([10, 25, 50])
-            ->defaultPaginationPageOption(25)
             ->paginationMode(PaginationMode::Simple)
             ->persistFiltersInSession()
             ->persistSearchInSession()

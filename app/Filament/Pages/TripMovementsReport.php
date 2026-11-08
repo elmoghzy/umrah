@@ -43,14 +43,14 @@ class TripMovementsReport extends Page implements HasTable
             ->columns([
                 TextColumn::make('row_number')->label('م')->rowIndex(),
                 TextColumn::make('booking.booking_number')->label('رقم الحجز')->sortable()->searchable(),
-                TextColumn::make('booking.broker.name')->label('الفرع')->placeholder('الفرع الرئيسي')->sortable(),
+                TextColumn::make('booking.broker.name')->label('الفرع')->placeholder('الفرع الرئيسي')->sortable()->searchable(),
                 TextColumn::make('booking.customer.name_ar')->label('ولي الأمر')->searchable(),
                 TextColumn::make('booking.bookingType.name')->label('النوع')->sortable(),
                 TextColumn::make('hotel.name_ar')->label('الفندق')->sortable()->searchable(),
                 TextColumn::make('check_in')->label('الدخول')->date('d/m/Y')->sortable(),
                 TextColumn::make('check_out')->label('الخروج')->date('d/m/Y')->sortable(),
                 TextColumn::make('created_at')->label('تاريخ التسجيل')->date('d/m/Y')->sortable(),
-                TextColumn::make('booking.notes')->label('الملاحظة')->wrap(),
+                TextColumn::make('booking.notes')->label('الملاحظة')->wrap()->searchable(),
             ])
             ->filters([
                 SelectFilter::make('hotel_id')->label('الفندق')->options(fn (): array => Hotel::query()->orderBy('name_ar')->pluck('name_ar', 'id')->all())->searchable()->preload(),
@@ -79,7 +79,6 @@ class TripMovementsReport extends Page implements HasTable
             ])
             ->striped()
             ->paginated([10, 25, 50])
-            ->defaultPaginationPageOption(25)
             ->defaultSort('id', 'desc')
             ->emptyStateHeading('لا توجد نتائج');
     }

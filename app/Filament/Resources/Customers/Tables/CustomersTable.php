@@ -68,13 +68,11 @@ class CustomersTable
             ->defaultSort('id', 'desc')
             ->deferLoading(app()->isProduction())
             ->paginated([10, 25, 50])
-            ->defaultPaginationPageOption(25)
             ->paginationMode(PaginationMode::Simple)
             ->persistFiltersInSession()
             ->persistSearchInSession()
             ->persistSortInSession()
             ->searchDebounce('500ms')
-            ->searchOnBlur()
             ->splitSearchTerms(false)
             ->deferFilters(app()->isProduction());
     }

@@ -45,7 +45,6 @@ class CitiesTable
             ->defaultSort('id', 'desc')
             ->deferLoading(app()->isProduction())
             ->paginated([10, 25, 50])
-            ->defaultPaginationPageOption(25)
             ->persistFiltersInSession()
             ->persistSearchInSession()
             ->persistSortInSession()

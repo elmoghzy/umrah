@@ -41,7 +41,6 @@ class UsersTable
             ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['broker:id,name']))
             ->deferLoading(app()->isProduction())
             ->paginated([10, 25, 50])
-            ->defaultPaginationPageOption(25)
             ->persistSearchInSession()
             ->persistSortInSession()
             ->searchDebounce('500ms');

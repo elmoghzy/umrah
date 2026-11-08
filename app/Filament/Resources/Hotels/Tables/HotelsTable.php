@@ -54,7 +54,6 @@ class HotelsTable
             ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['city:id,name']))
             ->deferLoading(app()->isProduction())
             ->paginated([10, 25, 50])
-            ->defaultPaginationPageOption(25)
             ->persistFiltersInSession()
             ->persistSearchInSession()
             ->persistSortInSession()

@@ -181,7 +181,6 @@ class BookingForm
     {
         return Tab::make('الغرف')
             ->icon(Heroicon::OutlinedHomeModern)
-            ->badge(fn (Get $get): ?int => count($get('rooms') ?? []) ?: null)
             ->schema([
                 Section::make()->schema([
                     Repeater::make('rooms')

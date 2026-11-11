@@ -14,6 +14,7 @@ use BaconQrCode\Writer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 // Route::get('/', function () {
 // return view('welcome');
@@ -46,6 +47,16 @@ Route::middleware('auth')->get('/admin/bookings/{booking}/receipt', function (Bo
 })->name('bookings.receipt');
 
 Route::middleware('auth')->group(function (): void {
+    Route::get('/admin/database-backups/{filename}/download', function (string $filename) {
+        abort_unless(auth()->user()?->isMainAdmin(), 403);
+        abort_unless($filename === basename($filename) && preg_match('/^database-[0-9_-]+\.(sqlite|mysql)$/', $filename), 404);
+
+        $path = 'backups/'.$filename;
+        abort_unless(Storage::disk('local')->exists($path), 404);
+
+        return response()->download(Storage::disk('local')->path($path), $filename);
+    })->name('admin.database-backups.download');
+
     Route::get('/admin/visas/{visa}/file', VisaFileController::class)->name('visas.file');
 
     Route::get('/admin/reports/booking-list/print', function (Request $request) {

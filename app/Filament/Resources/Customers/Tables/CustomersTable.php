@@ -8,7 +8,6 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Enums\PaginationMode;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
@@ -68,7 +67,6 @@ class CustomersTable
             ->defaultSort('id', 'desc')
             ->deferLoading(app()->isProduction())
             ->paginated([10, 25, 50])
-            ->paginationMode(PaginationMode::Simple)
             ->persistFiltersInSession()
             ->persistSearchInSession()
             ->persistSortInSession()

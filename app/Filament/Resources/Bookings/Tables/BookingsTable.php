@@ -13,7 +13,6 @@ use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Enums\PaginationMode;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
@@ -91,7 +90,6 @@ class BookingsTable
             ->striped()
             ->defaultSort('id', 'desc')
             ->paginated([10, 25, 50])
-            ->paginationMode(PaginationMode::Simple)
             ->persistFiltersInSession()
             ->persistSearchInSession()
             ->persistSortInSession()

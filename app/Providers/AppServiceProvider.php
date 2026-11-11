@@ -15,6 +15,7 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\Field;
 use Filament\Infolists\Components\Entry;
 use Filament\Tables\Columns\Column;
+use Filament\Tables\Enums\PaginationMode;
 use Filament\Tables\Filters\BaseFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\ServiceProvider;
@@ -37,6 +38,7 @@ class AppServiceProvider extends ServiceProvider
         Table::configureUsing(
             fn (Table $table): Table => $table
                 ->defaultPaginationPageOption(10)
+                ->paginationMode(PaginationMode::Simple)
                 ->persistRecordsPerPageInSession(false),
         );
 

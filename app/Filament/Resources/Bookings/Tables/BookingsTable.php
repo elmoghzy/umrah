@@ -2,15 +2,15 @@
 
 namespace App\Filament\Resources\Bookings\Tables;
 
-use App\Actions\SimpleResourceTableActions;
 use App\Enums\StayScope;
 use App\Enums\VisaStatus;
+use App\Filament\Resources\Bookings\BookingResource;
 use App\Models\Booking;
 use App\Models\Hotel;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
-use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -68,6 +68,16 @@ class BookingsTable
                         ->when($data['until'] ?? null, fn (Builder $query, $date): Builder => $query->whereHas('details', fn (Builder $details): Builder => $details->where('check_in', '<=', $date)))),
             ])
             ->modifyQueryUsing(fn (Builder $query): Builder => $query
+                ->select([
+                    'bookings.id',
+                    'bookings.customer_id',
+                    'bookings.broker_id',
+                    'bookings.booking_type_id',
+                    'bookings.booking_number',
+                    'bookings.stay_scope',
+                    'bookings.net_amount',
+                    'bookings.deleted_at',
+                ])
                 ->with([
                     'broker:id,name',
                     'customer:id,name_ar',
@@ -77,19 +87,25 @@ class BookingsTable
                     'visas as visas_total_count',
                     'visas as visas_issued_count' => fn (Builder $visas): Builder => $visas->where('status', VisaStatus::Issued->value),
                 ]))
-            ->recordActions([
-                ViewAction::make()->label('عرض'),
-                ...SimpleResourceTableActions::recordActions(),
-            ])
+            ->recordUrl(fn (Booking $record): string => BookingResource::getUrl('view', ['record' => $record]))
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    RestoreBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->authorizeIndividualRecords('delete')
+                        ->visible(fn (): bool => auth()->user()?->isMainAdmin() ?? false),
+                    RestoreBulkAction::make()
+                        ->authorizeIndividualRecords('restore')
+                        ->visible(fn (): bool => auth()->user()?->isMainAdmin() ?? false),
+                    ForceDeleteBulkAction::make()
+                        ->authorizeIndividualRecords('forceDelete')
+                        ->visible(fn (): bool => auth()->user()?->isMainAdmin() ?? false),
                 ]),
             ])
             ->striped()
             ->defaultSort('id', 'desc')
-            ->paginated([10, 25, 50])
+            ->paginated([10, 25, 50, 100, 250])
+            ->defaultPaginationPageOption(25)
+            ->deferLoading(app()->isProduction())
             ->persistFiltersInSession()
             ->persistSearchInSession()
             ->persistSortInSession()

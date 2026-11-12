@@ -79,7 +79,6 @@ class BookingForm
                         ->relationship('customer', 'name_ar', modifyQueryUsing: fn (Builder $query): Builder => $query->whereNull('guardian_id'))
                         ->searchable()
                         ->searchDebounce(300)
-                        ->optionsLimit(20)
                         ->live()
                         ->required()
                         ->createOptionForm([

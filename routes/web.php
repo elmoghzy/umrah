@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\VisaStatus;
+use App\Filament\Resources\Bookings\BookingResource;
 use App\Http\Controllers\PublicVisaFileController;
 use App\Http\Controllers\PublicVisaStatusController;
 use App\Http\Controllers\VisaFileController;
@@ -11,6 +13,7 @@ use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
@@ -58,6 +61,52 @@ Route::middleware('auth')->group(function (): void {
     })->name('admin.database-backups.download');
 
     Route::get('/admin/visas/{visa}/file', VisaFileController::class)->name('visas.file');
+
+    Route::get('/admin/reports/bookings-page/print', function (Request $request) {
+        Gate::authorize('viewAny', Booking::class);
+
+        $bookingIds = validator(
+            ['bookingIds' => $request->query('bookingIds', [])],
+            [
+                'bookingIds' => ['array', 'max:250'],
+                'bookingIds.*' => ['required', 'integer', 'min:1', 'distinct'],
+            ],
+        )->validate()['bookingIds'];
+        $bookingIds = array_map('intval', $bookingIds);
+
+        $bookingsById = BookingResource::getEloquentQuery()
+            ->withTrashed()
+            ->select([
+                'bookings.id',
+                'bookings.customer_id',
+                'bookings.broker_id',
+                'bookings.booking_type_id',
+                'bookings.booking_number',
+                'bookings.stay_scope',
+                'bookings.net_amount',
+                'bookings.deleted_at',
+            ])
+            ->whereKey($bookingIds)
+            ->with([
+                'broker:id,name',
+                'customer:id,name_ar',
+                'bookingType:id,name',
+            ])
+            ->withCount([
+                'residents',
+                'visas as visas_total_count',
+                'visas as visas_issued_count' => fn (Builder $visas): Builder => $visas->where('status', VisaStatus::Issued->value),
+            ])
+            ->get()
+            ->keyBy(fn (Booking $booking): int => (int) $booking->getKey());
+
+        $bookings = collect($bookingIds)
+            ->map(fn (int $bookingId): ?Booking => $bookingsById->get($bookingId))
+            ->filter()
+            ->values();
+
+        return view('reports.bookings-page-print', ['bookings' => $bookings, 'watermark' => true]);
+    })->name('reports.bookings-page.print');
 
     Route::get('/admin/reports/booking-list/print', function (Request $request) {
         Gate::authorize('viewAny', Booking::class);

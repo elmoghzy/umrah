@@ -93,6 +93,14 @@ class BranchAuthorizationTest extends TestCase
                 ->assertSee('عميل الفرع أ')
                 ->assertDontSee('عميل الفرع ب');
         }
+
+        $this->get(route('reports.bookings-page.print', [
+            'bookingIds' => [$bookingA->getKey(), $bookingB->getKey()],
+        ]))
+            ->assertOk()
+            ->assertSee((string) $bookingA->booking_number)
+            ->assertDontSee((string) $bookingB->booking_number)
+            ->assertSee('الإجمالي: 1');
     }
 
     public function test_branch_employee_cannot_open_another_branches_booking(): void

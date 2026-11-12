@@ -13,6 +13,7 @@ use App\Models\Visa;
 use App\Observers\DashboardCacheObserver;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Field;
+use Filament\Forms\Components\Select;
 use Filament\Infolists\Components\Entry;
 use Filament\Tables\Columns\Column;
 use Filament\Tables\Enums\PaginationMode;
@@ -44,6 +45,12 @@ class AppServiceProvider extends ServiceProvider
 
         Field::configureUsing(
             fn (Field $field): Field => $field->translateLabel(),
+        );
+
+        Select::configureUsing(
+            fn (Select $select): Select => $select
+                ->preload()
+                ->optionsLimit(2000),
         );
 
         Column::configureUsing(

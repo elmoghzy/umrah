@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Actions\Bookings\CreateBookingAction;
 use App\Enums\StayScope;
+use App\Models\Booking;
 use App\Models\BookingType;
 use App\Models\City;
 use App\Models\Company;
@@ -55,5 +56,36 @@ class ReportPrintTest extends TestCase
         $this->get(route('reports.booking-list.print', ['bookingTypeId' => 999]))
             ->assertOk()
             ->assertDontSee('عميل التقرير');
+    }
+
+    public function test_booking_page_print_contains_only_the_requested_bookings_in_order(): void
+    {
+        $bookings = Booking::factory()->count(3)->create();
+        $firstPrintedBooking = $bookings[2];
+        $secondPrintedBooking = $bookings[0];
+        $excludedBooking = $bookings[1];
+
+        $response = $this->actingAs(User::factory()->create())
+            ->get(route('reports.bookings-page.print', [
+                'bookingIds' => [$firstPrintedBooking->getKey(), $secondPrintedBooking->getKey()],
+            ]));
+
+        $response->assertOk()
+            ->assertSeeInOrder([
+                (string) $firstPrintedBooking->booking_number,
+                (string) $secondPrintedBooking->booking_number,
+            ])
+            ->assertDontSee((string) $excludedBooking->booking_number)
+            ->assertSee('الإجمالي: 2');
+    }
+
+    public function test_booking_page_print_rejects_more_than_250_booking_ids(): void
+    {
+        $response = $this->actingAs(User::factory()->create())
+            ->from('/admin/bookings')
+            ->get(route('reports.bookings-page.print', ['bookingIds' => range(1, 251)]));
+
+        $response->assertRedirect('/admin/bookings')
+            ->assertSessionHasErrors('bookingIds');
     }
 }

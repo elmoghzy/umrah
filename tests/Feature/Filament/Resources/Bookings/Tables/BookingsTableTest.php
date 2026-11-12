@@ -33,6 +33,7 @@ class BookingsTableTest extends TestCase
         $component = Livewire::test(ListBookings::class)->assertOk();
         $component->assertCountTableRecords(self::TOTAL_BOOKINGS);
         $this->assertSame([10, 25, 50, 100, 250], $component->instance()->getTable()->getPaginationPageOptions());
+        $this->assertSame(250, $component->instance()->getTable()->getDefaultPaginationPageOption());
 
         $connection = DB::connection();
         $connection->enableQueryLog();
@@ -191,6 +192,24 @@ class BookingsTableTest extends TestCase
         $component->removeTableFilters()
             ->sortTable('net_amount', 'asc')
             ->assertCanSeeTableRecords([$secondBooking, $thirdBooking, $firstBooking], inOrder: true);
+    }
+
+    public function test_print_action_uses_only_the_current_table_page(): void
+    {
+        Filament::setCurrentPanel('admin');
+        $this->actingAs(User::factory()->create());
+
+        Booking::factory()->count(12)->create();
+
+        $component = Livewire::test(ListBookings::class)->assertOk();
+        $component->set('tableRecordsPerPage', 10);
+        $component->call('gotoPage', 2, $component->instance()->getTablePaginationPageName());
+        $bookingIds = collect($component->instance()->getTableRecords()->items())
+            ->map(fn (Booking $booking): int => (int) $booking->getKey())
+            ->all();
+
+        $component->assertActionHasUrl('print', route('reports.bookings-page.print', ['bookingIds' => $bookingIds]));
+        $this->assertCount(2, $bookingIds);
     }
 
     private function createBookings(int $count): void

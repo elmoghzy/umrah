@@ -104,7 +104,7 @@ class BookingsTable
             ->striped()
             ->defaultSort('id', 'desc')
             ->paginated([10, 25, 50, 100, 250])
-            ->defaultPaginationPageOption(25)
+            ->defaultPaginationPageOption(250)
             ->deferLoading(app()->isProduction())
             ->persistFiltersInSession()
             ->persistSearchInSession()
